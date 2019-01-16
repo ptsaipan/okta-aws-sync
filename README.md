@@ -1,6 +1,11 @@
 # okta-aws-sync
 
-This is a sample template for okta-aws-sync - Below is a brief explanation of what we have generated for you:
+okta-aws-sync helps sync roles from AWS IAM to Groups in Okta in near real-time using CloudWatch Rules Trigger on IAM events. This can be used to further automate the AWS Dynamic Role mapping functionality
+
+(More to come -
+Delete Role, Update Role, Group Rules)
+
+Below is a brief explanation of what we have generated for you:
 
 ```bash
 .
