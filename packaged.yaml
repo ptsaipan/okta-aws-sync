@@ -1,0 +1,33 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'okta-aws-sync
+
+  Sample SAM Template for okta-aws-sync
+
+  '
+Globals:
+  Function:
+    Timeout: 3
+Outputs:
+  SyncAWSRoleToOkta:
+    Description: Sync AWS Role to Okta Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - SyncAWSRoleToOkta
+      - Arn
+  SyncAWSRoleToOktaIamRole:
+    Description: Implicit IAM Role created for Sync Role function
+    Value:
+      Fn::GetAtt:
+      - SyncAWSRoleToOktaRole
+      - Arn
+Resources:
+  SyncAWSRoleToOkta:
+    Properties:
+      CodeUri: s3://ptp-samapp-deployment-east/dc7dfbae2d774698381e5bab35b52316
+      Environment:
+        Variables:
+          PARAM1: VALUE
+      Handler: app.lambdaHandler
+      Runtime: nodejs8.10
+    Type: AWS::Serverless::Function
+Transform: AWS::Serverless-2016-10-31

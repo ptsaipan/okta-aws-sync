@@ -1,0 +1,33 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+    okta-aws-sync
+
+    Sample SAM Template for okta-aws-sync
+    
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+    Function:
+        Timeout: 3
+
+
+Resources:
+
+    SyncAWSRoleToOkta:
+        Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+        Properties:
+            CodeUri: sync-roles/
+            Handler: app.lambdaHandler
+            Runtime: nodejs8.10
+            Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+                Variables:
+                    PARAM1: VALUE
+Outputs:
+
+    SyncAWSRoleToOkta:
+      Description: "Sync AWS Role to Okta Lambda Function ARN"
+      Value: !GetAtt SyncAWSRoleToOkta.Arn
+
+    SyncAWSRoleToOktaIamRole:
+      Description: "Implicit IAM Role created for Sync Role function"
+      Value: !GetAtt SyncAWSRoleToOktaRole.Arn
