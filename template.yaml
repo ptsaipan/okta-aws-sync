@@ -22,7 +22,37 @@ Resources:
             Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
                 Variables:
                     PARAM1: VALUE
-Outputs:
+    EventRule:
+        Type: AWS::Events::Rule
+        Properties:
+          Description: CloudWatchLogsRule
+          EventPattern:
+            source:
+              - "aws.iam"
+            detail-type:
+              - "AWS API Call via CloudTrail"
+            detail:
+              eventSource:
+                - "iam.amazonaws.com"
+              eventName:
+                - "CreateRole"
+          Name: CW_IAM_API_Trigger_TEST
+          ScheduleExpression: String
+          State: "ENABLED"
+          Targets:
+            - sam-app-hw-SyncAWSRoleToOkta-18K0RCHTI97WZ
+    PermissionForEventsToInvokeLambda:
+      Type: AWS::Lambda::Permission
+      Properties:
+        FunctionName:
+          Ref: "LambdaFunction"
+        Action: "lambda:InvokeFunction"
+        Principal: "events.amazonaws.com"
+        SourceArn:
+          Fn::GetAtt:
+            - "EventRule"
+            - "Arn"
+  Outputs:
 
     SyncAWSRoleToOkta:
       Description: "Sync AWS Role to Okta Lambda Function ARN"
