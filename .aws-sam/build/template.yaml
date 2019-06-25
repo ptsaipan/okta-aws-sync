@@ -1,9 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'okta-aws-sync
-
-  Sample SAM Template for okta-aws-sync
-
-  '
+Description: okta-aws-sync - Sample SAM Template for okta-aws-sync.
 Globals:
   Function:
     Timeout: 3

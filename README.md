@@ -5,44 +5,30 @@ okta-aws-sync helps sync roles from AWS IAM to Groups in Okta in near real-time 
 (More to come -
 Delete Role, Update Role, Group Rules)
 
-Below is a brief explanation of what we have generated for you:
-
-```bash
-.
-├── README.md                   <-- This instructions file
-├── hello-world                 <-- Source code for a lambda function
-│   ├── app.js                  <-- Lambda function code
-│   ├── package.json            <-- NodeJS dependencies
-│   └── tests                   <-- Unit tests
-│       └── unit
-│           └── test_handler.js
-└── template.yaml               <-- SAM template
-```
-
 ## Requirements
 
 * AWS CLI already configured with Administrator permission
 * [NodeJS 8.10+ installed](https://nodejs.org/en/download/)
-* [Docker installed](https://www.docker.com/community-edition)
+* install SAM CLI - https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html 
 
 ## Setup process
 
-Set up your api key and url in the lambda env variable
+clone this repo and run the following commands
+
+```bash
+cd sync-role
+npm install
+```
 
 ### Building the project
 
-[AWS Lambda requires a flat folder](https://docs.aws.amazon.com/lambda/latest/dg/nodejs-create-deployment-pkg.html) with the application as well as its dependencies in a node_modules folder. When you make changes to your source code or dependency manifest,
-run the following command to build your project local testing and deployment:
- 
+This project uses AWS Serverless Application Model (AWS SAM) for https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html
+
 ```bash
+cd ..
 sam build
 ```
 
-If your dependencies contain native modules that need to be compiled specifically for the operating system running on AWS Lambda, use this command to build inside a Lambda-like Docker container instead:
-```bash
-sam build --use-container
-```
- 
 By default, this command writes built artifacts to `.aws-sam/build` folder.
 
 
@@ -72,6 +58,7 @@ sam package \
     --template-file template.yaml \
     --output-template-file packaged.yaml \
     --s3-bucket REPLACE_THIS_WITH_YOUR_S3_BUCKET_NAME
+    --region us-east-1
 ```
 
 Next, the following command will create a Cloudformation Stack and deploy your SAM resources.
@@ -81,52 +68,45 @@ sam deploy \
     --template-file packaged.yaml \
     --stack-name okta-aws-sync \
     --capabilities CAPABILITY_IAM
+    --region us-east-1 
+    --profile yourlocalawsProfileName
 ```
 
 > **See [Serverless Application Model (SAM) HOWTO Guide](https://github.com/awslabs/serverless-application-model/blob/master/HOWTO.md) for more details in how to get started.**
 
-After deployment is complete you can run the following command to retrieve the API Gateway Endpoint URL:
+## After deployment is complete:
 
-```bash
-aws cloudformation describe-stacks \
-    --stack-name okta-aws-sync \
-    --query 'Stacks[].Outputs'
-``` 
+Set up your api key [apiKey] and orgurl [orgURL] in the lambda env variable. Recommend encryption with KMS for key. 
+
+## Cloud Watch Event Rule: 
+Create a Cloud watch event Rule with the following Event pattern: This pattern with source: aws.iam only works in us-east region 
+
+
+{
+  "source": [
+    "aws.iam"
+  ],
+  "detail-type": [
+    "AWS API Call via CloudTrail"
+  ],
+  "detail": {
+    "eventSource": [
+      "iam.amazonaws.com"
+    ],
+    "eventName": [
+      "CreateRole"
+    ]
+  }
+}
+
+For your Cloud watch event rule target - select the lambda function we just deployed
+
+**NOTE**: This will be added to the SAM Application configuration in the future so you don't have to manually set it up.
+For additional IAM events like update and delete, we will add them to the eventRule in the future
 
 ## Testing
 
-We use `mocha` for testing our code and it is already added in `package.json` under `scripts`, so that we can simply run the following command to run our tests:
+create a role in AWS and it should show up as a groupin Okta
 
-```bash
-cd sync-role
-npm install
-npm run test
-```
 
-# Appendix
-
-## AWS CLI commands
-
-AWS CLI commands to package, deploy and describe outputs defined within the cloudformation stack:
-
-```bash
-sam package \
-    --template-file template.yaml \
-    --output-template-file packaged.yaml \
-    --s3-bucket REPLACE_THIS_WITH_YOUR_S3_BUCKET_NAME
-
-sam deploy \
-    --template-file packaged.yaml \
-    --stack-name okta-aws-sync \
-    --capabilities CAPABILITY_IAM \
-    --parameter-overrides MyParameterSample=MySampleValue
-
-aws cloudformation describe-stacks \
-    --stack-name okta-aws-sync --query 'Stacks[].Outputs'
-```
-
-**NOTE**: Alternatively this could be part of package.json scripts section.
-
-## Testing with IAM event
-
-Create IAM role in AWS East region along with Cloudwatch event rule trigger
+Create IAM role in AWS East region. The Cloudwatch event rule will trigger the ;ambda function and the role will show up as a group in Okta. 
